@@ -1,0 +1,8 @@
+CHIP FALL { 
+    IN A, B, C, D, f1, f2;
+    OUT F, G;
+
+    PARTS:
+    And(a=A, b=C, out=F);
+    And(a=B, b=D, out=G);
+}

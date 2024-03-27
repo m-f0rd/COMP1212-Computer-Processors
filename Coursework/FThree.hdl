@@ -1,0 +1,65 @@
+CHIP FThree { 
+    IN A, B, C, D;
+    OUT E, F, G;
+
+    PARTS:
+// E = AC + BCD + ABD 
+// ands:
+    And(a=A, b=C, out=AC-total);
+
+    And(a=B, b=C, out=BC-and);
+    And(a=BC-and, b=D, out=BCD-total);
+
+    And(a=A, b=B, out=AB-and);
+    And(a=AB-and, b=D, out=ABD-total);
+// ors:
+
+    Or(a=AC-total, b=BCD-total, out=AC-or-BCD);
+    Or(a=AC-or-BCD, b=ABD-total, out=E);
+// --------------------------------------
+// F = A'B'C + A'CD' + AB'C' + AC'D' + A'BC'D + ABCD
+// Nots:
+    Not(in=A, out=notA);
+    Not(in=B, out=notB);
+    Not(in=C, out=notC);
+    Not(in=D, out=notD);
+
+// ands:
+
+// A'B'C = notA-notB-C-total ya
+    And(a=notA, b=notB, out=notA-notB);
+    And(a=notA-notB, b=C, out=notA-notB-C-total);
+// A'CD' = notA-notD-and-C-total hope
+    And(a=notA, b=notD, out=notA-and-notD);
+    And(a=notA-and-notD, b=C, out=notA-notD-and-C-total);
+// AB'C' = A-notB-notC-total ya
+    And(a=notB, b=notC, out=notB-notC);
+    And(a=notB-notC, b=A, out=A-notB-notC-total);
+// AC'D' = A-notC-notD-total
+    And(a=notC, b=notD, out=notC-notD);
+    And(a=notC-notD, b=A, out=A-notC-notD-total);
+// A'BC'D = notA-B-notC-D-total
+    And(a=notA, b=notC, out=notA-notC);
+    And(a=B, b=D, out=BD);
+    And(a=notA-notC, b=BD, out=notA-B-notC-D-total);
+// ABCD = ABCD-total
+    And(a=A, b=B, out=AB);
+    And(a=C, b=D, out=CD);
+    And(a=AB, b=CD, out=ABCD-total);
+// ors:
+
+    Or(a=notA-notB-C-total, b=notA-notD-and-C-total, out=x);
+    Or(a=A-notB-notC-total, b=A-notC-notD-total, out=y);
+    Or(a=notA-B-notC-D-total, b=ABCD-total, out=z);
+    Or(a=x, b=y, out=v);
+    Or(a=v, b=z, out=F);
+// --------------------------------------
+// G = BD' + DB'
+// Nots:
+// ands:
+    And(a=B, b=notD, out=BnotD);
+    And(a=D, b=notB, out=DnotB);
+// ors:
+    Or(a=BnotD, b=DnotB, out=G);
+}
+
