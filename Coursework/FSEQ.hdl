@@ -1,0 +1,27 @@
+/**
+For this task adapt the circuit FALL so that it can combine a sequence of operations defined by different values for f1 and f0 at each step, by enabling the outputs Ft and Gt of step t to be used (feedback) as the inputs for the next operation Ct+1 and Dt+1 for step t + 1. You should also add a further input (Load) to the chip which when Load = 1 will enable you to load new inputs to Ct and Dt and when set to 0 sets Ct+1 = Ft and Dt+1 = Gt. The Load input will allow you to manually set the values of C and D at the start and during the sequence if required.
+load = 1 --> load new inputs to Ct and Dt
+load = 0 --> Ct+1 = Ft and Dt+1 = Gt
+*/
+CHIP FSEQ {
+    IN A, B, C, D, f1, f0, load;
+    OUT E, F, G;
+
+    PARTS:
+    // Define the four chips here. For example:
+    FZero(A=A, B=B, C=C, D=D, F=zeroF, G=zeroG);
+    FOne(A=A, B=B, C=C, D=D, F=oneF, G=oneG);
+    FTwo(A=A, B=B, C=C, D=D, F=twoF, G=twoG);
+    FThree(A=A, B=B, C=C, D=D, E=threeE, F=threeF, G=threeG);
+
+    // Use a Mux chip to select the inputs for the next operation
+    Mux(a=C, b=zeroF, sel=load, out=C-in);
+    Mux(a=D, b=zeroG, sel=load, out=D-in);
+
+    // Define the DFF chips
+    DFF(in=C-in, out=C-next);
+    DFF(in=D-in, out=D-next);
+
+    // Define the FALL chip
+    FALL(A=A, B=B, C=C-next, D=D-next, f1=f1, f0=f0, E=E, F=F, G=G);
+}

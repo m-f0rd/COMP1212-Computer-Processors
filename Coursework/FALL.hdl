@@ -1,8 +1,66 @@
 CHIP FALL { 
-    IN A, B, C, D, f1, f2;
-    OUT F, G;
+    IN A, B, C, D, f1, f0;
+    OUT E, F, G;
 
     PARTS:
-    And(a=A, b=C, out=F);
-    And(a=B, b=D, out=G);
+    FZero(A=A, B=B, C=C, D=D, F=Zero-Out-F);
+    FZero(A=A, B=B, C=C, D=D, G=Zero-Out-G);
+
+    FOne(A=A, B=B, C=C, D=D, F=One-Out-F);
+    FOne(A=A, B=B, C=C, D=D, G=One-Out-G);
+
+    FTwo(A=A, B=B, C=C, D=D, F=Two-Out-F);
+    FTwo(A=A, B=B, C=C, D=D, G=Two-Out-G);
+
+    FThree(A=A, B=B, C=C, D=D, E=Three-Out-E);
+    FThree(A=A, B=B, C=C, D=D, F=Three-Out-F);
+    FThree(A=A, B=B, C=C, D=D, G=Three-Out-G);
+
+
+/** 
+ * Multiplexor. If sel == 1 then out = b else out = a.
+ */
+// HAS TWO PAIRS, OF OPPOSITE F1 VALUES TO CHECK AGAINST F1
+// F0 THEN CHOSES OUT OF THE PAIR WITH THE SAME F1 VALUE
+    Mux(a=Two-Out-F, b=Zero-Out-F, sel=f1, out=FZero-or-FTwo-out-F); //zero if 1, two if 0
+    Mux(a=Three-Out-F, b=One-Out-F, sel=f1, out=FOne-or-FThree-out-F); // one if 1, three if 0
+    Mux(a=FOne-or-FThree-out-F, b=FZero-or-FTwo-out-F, sel=f0, out=F); // zero or two if 1, one or three if 0
+
+    Mux(a=Two-Out-G, b=Zero-Out-G, sel=f1, out=FZero-or-FTwo-out-G); //zero if 1, two if 0
+    Mux(a=Three-Out-G, b=One-Out-G, sel=f1, out=FOne-or-FThree-out-G); // one if 1, three if 0
+    Mux(a=FOne-or-FThree-out-G, b=FZero-or-FTwo-out-G, sel=f0, out=G); // zero or two if 1, one or three if 0
+
+    Not(in=f1, out=notf1);
+    Not(in=f0, out=notf0);
+    // ifThree is 1 if f1f0 = 0,0
+    And(a=notf1, b=notf0, out=ifThree);
+    // ifThree == 1, choose b=E else choose a=0
+    Mux(a=0, b=Three-Out-E, sel=ifThree, out=E); // zero or two if 1, one or three if 0
+
 }
+
+//noot
+
+    // and to see if it is that chip
+    And(a=f1, b=f0, out=ifZero);        //if f1 f0 = 1,1
+    And(a=f1, b=notf0, out=ifOne);      //if f1 f0 = 1,0 then f0 is notted to a 1
+    And(a=notf1, b=f0, out=ifTwo);      //if f1 f0 = 0,1
+    And(a=notf1, b=notf0, out=ifThree); //if f1 f0 = 0,0
+
+    Mux(a=, b=)
+
+
+    
+    // Use a multiplexer to select the chip based on f1 and f0#
+    //
+    
+/**
+ * 4-way 16-bit multiplexor.  
+ * out = a if sel == 00 -->THREE
+ *       b if sel == 01 --> TWO
+ *       c if sel == 10 --> ONE
+ *       d if sel == 11 --> ZERO
+ */
+    Mux4Way16(a=Three-Out-E, b=f1, c=f1, d=f1, sel={f1, f0}, out=E);
+    Mux4Way16(a=Three-Out-F, b=Two-Out-F, c=One-Out-F, d=Zero-Out-F, sel={f1, f0}, out=F);
+    Mux4Way16(a=Three-Out-G, b=Two-Out-G, c=One-Out-G, d=Zero-Out-G, sel={f1, f0}, out=G);
