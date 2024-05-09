@@ -1,57 +1,74 @@
+# Write a program (FeistelEncryption.asm) in HACK assembly, that implements
+# the described Feistel encryption system. The initial key, K0, will be stored in
+# RAM[1], and the plaintext to be encrypted will be represented by a 16-bit value
+# stored in RAM[2]. The result of the encryption should be stored in RAM[0].
 
-# a) Write a program (XOR.asm) in HACK assembly that implements a bit-wise XOR function between two 16-bit values stored in RAM[3] and RAM[4] and stores the result in RAM[5].
+# K0 = 0
+# P = 0000000000000000
+# #-----------------------------
+# RAM1 = K0
+# RAM2 = P
+# RAM0 = 0 #result
 
-RAM3 = int(10)
-RAM4 = int(11)
-RAM5 = bin(RAM3 ^ RAM4)
-print(RAM5)
+# # setup
+# RAM4 = 1111111100000000 #FRONT MASK
+# RAM5 = 11111111         #BACK MASK
+# RAM3 = 0 # temp
 
-key = 76543210
+# RAM7 = 0 #L
+# RAM8 = 0 #R
 
-shift1 = 1010111100000000
-shift2 = 0
-check = 111100000000101 # 0111100000000101
+# def getLeft(plaintext, backMask):
+#     pass
+# def getRight(plaintext, frontMask):
+#     pass
 
-def leftShift(number, times):
-    stringNum = str(number)
+# def F(A, B):
+#     # A XOR !B
+#     pass
 
-    for i in range(times):
-        temp = stringNum[0]
-        stringNum = stringNum[1:]
-        stringNum = stringNum + temp
-
-    return((stringNum))
-
-print(leftShift(shift1, 3))
-print("0111100000000101") #works
-# def feistel_block(plain_text, keys):
-#     L, R = plain_text[:8], plain_text[8:]
-#     for key in keys:
-#         temp = R
-#         R = bin(int(L, 2) ^ int(F(R, key), 2))[2:].zfill(8)
-#         L = temp
-#     return R + L
-
-# def F(R, key): 
-#     # This is a toy Feistel function.
-#     # In a real Feistel cipher, this would be a more complex function.
-#     return bin(int(R, 2) ^ key)[2:].zfill(8)
-
-# plain_text = '0110111101111011'
-# keys = [0b10101010, 0b11001100, 0b11110000, 0b10101011]
-
-# cipher_text = feistel_block(plain_text, keys)
-# print('Cipher text:', cipher_text)
-
-"""
-16-bit Feistel Cipher
-4 rounds
-F(A,B) = A XOR (NOT B)
-8-bit key K
-K0 =b7b6b5b4b3b2b1b0 
-K1 =b6b5b4b3b2b1b0b7 
-K2 =b5b4b3b2b1b0b7b6 
-K3 =b4b3b2b1b0b7b6b5
+# def xor(A, B):
+#     pass
+# RAM7 = getLeft(RAM2, RAM5)
+# RAM8 = getRight(RAM2, RAM4)
 
 
-"""
+
+def feistel_block(plain_text, keys): 
+
+    L, R = plain_text[:8], plain_text[8:] 
+
+    for key in keys: 
+
+        temp = R 
+
+        R = bin(int(L, 2) ^ int(F(R, key), 2))[2:].zfill(8) 
+
+        L = temp 
+
+    return R + L 
+
+  
+
+def F(R, key):  
+
+    # This is a toy Feistel function. 
+
+    # In a real Feistel cipher, this would be a more complex function. 
+
+    return bin(int(R, 2) ^ key)[2:].zfill(8) 
+
+  
+
+#plain_text = '0110111101111011' 
+plain_text = '0000000000000000' 
+
+#keys = [0b10101010, 0b11001100, 0b11110000, 0b10101011] 
+keys = [0b00000000, 0b00000000, 0b00000000, 0b00000000] 
+
+  
+
+cipher_text = feistel_block(plain_text, keys) 
+
+print('Cipher text:', cipher_text)
+
