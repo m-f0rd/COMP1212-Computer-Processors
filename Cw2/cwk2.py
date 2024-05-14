@@ -73,3 +73,162 @@ K3 =b4b3b2b1b0b7b6b5
 
 
 """
+
+
+""" from before 14/05 15:48
+
+// setup----------------------------------------------------------
+// __leading one setup ____
+// makes @LeadingOneCheck our leading one check 
+// makes @AddOneToLSB our adding one to end number
+@32767
+A=A+1
+D=A
+@LeadingOneCheck
+M=D
+@1
+D=A
+@AddOneToLSB
+M=D
+// __set masks __________
+@255
+D=A
+@MaskForRight
+M=D
+
+@32640
+D=A
+@MaskForLeft
+M=D
+@MaskForLeft
+M=M+D
+//-----------------
+// ___________________SEPARATE RIGHT AND LEFT TEXT FROM RAM[2]
+@R2
+D=M // get 16 bit plaintext
+@MaskForLeft
+D=D&M // and it so only one half remains
+@LeftPlainText
+M=D
+@L // create copy and then use it to or with shifted LeftPlainText
+M=D
+
+@R2
+D=M // get 16 bit plaintext
+@MaskForRight
+D=D&M // and it so only one half remains
+@RightPlainText
+M=D
+@R // create copy and then use it to or with shifted RightPlainText
+M=D
+
+
+// ___________________SEPARATE RIGHT AND LEFT TEXT
+// SET ROTATABLE KEY - RAM1 = K0_________________________________________ WORKS
+// ROTATION LOOP COUNTER = 8 IN RAM[8]
+@8
+D=A
+@R8
+M=D
+// create copy of key to OR later
+@R1
+D=M // get key
+@ogKey
+M=D // copy it in RAM[12]
+// LOOP FOR ROTATION 8 TIMES (shouldnt need the if statement)
+
+(RotateKey)
+	// ---- decrement counter RAM[8]
+	@R8
+	D=M
+	D=D-1
+	@R8
+	M=D
+    // main function --------------
+        // ----- ROTATE KEY
+        @R1
+        D=M // get key
+        @R11
+        M=D // copy it in RAM[11]
+
+        @R1
+        D=M // get key
+        @R11
+        D=D+M // times key by two aka shift it aka add it to itself
+        @R1 // save it back in RAM[1]
+        M=D
+        // ------ ROTATE RIGHT TEXT
+        @RightPlainText
+        D=M // get P(right)
+        @R2
+        M=D // copy it in RAM[2]
+        @RightPlainText // check to see if this simpler version works!
+        D=D+M 
+        M=D
+        // ------ ROTATE LEFT TEXT
+        @LeftPlainText
+        D=M // get P(Left)
+        @R2
+        M=D // copy it in RAM[2]
+            // check for leading one
+            @LeadingOneCheck
+            D=D&M // checks to see if there is a leading one
+            // if statement
+            @IfLeadingZero
+            D;JEQ
+                // else continue (if there is a leading one)
+                @LeftPlainText
+                D=M
+                @R2
+                D=D+M
+                // gets tailing one
+                @AddOneToLSB
+                D=D|M
+                @LeftPlainText
+                M=D 
+                @ENDIF
+                0;JMP
+            // if function jumps here
+            (IfLeadingZero)
+            @LeftPlainText
+            D=M
+            @R2
+            D=D+M
+            @LeftPlainText
+            M=D
+
+            // endif jumps here
+            (ENDIF)
+
+
+
+    // main function ends --------------
+// loop continues if RAM[8] != zero 
+    @R8
+    D=M
+    @RotateKey
+    D;JNE
+// OR FINAL RESULT WITH K0 AND MAKE ROTATABLE KEY
+@ogKey
+D=M
+@R1
+M=M|D
+
+// final result is stored in L
+@RightPlainText
+D=M
+@R
+D=D|M
+M=D
+@LeftPlainText
+D=M
+@L
+D=D|M
+M=D
+// __set counter________
+@4
+D=A
+@counter
+M=D
+
+"""
